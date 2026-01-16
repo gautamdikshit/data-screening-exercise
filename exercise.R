@@ -58,15 +58,15 @@ df_clean$State[df_clean$Name == "LA SALLE COUNTY REGIONAL DETENTIO[N CENTER"] <-
 #final checking of missing values
 colSums(is.na(df_clean))
 # only the date part is missing 
-# since it is a date which cannot be filled in random, and it doesn't contribute to our final top 19 data so I decided to leave it empty with NA
+# since it is a date which cannot be filled in random, and it doesn't contribute to our final top 10 data so I decided to leave it empty with NA
 
 
-# created new column 'population': total of level A to D
+# created new column 'Total Population': total of level A to D and arranged them in descending order
 df_clean <- df_clean %>%
   mutate(`Total Population` = Level.A + Level.B + Level.C + Level.D) %>%
   arrange(desc(`Total Population`))
 
-# Selected only top ten facilities Name and population 
+# Selected only top ten facilities Name and  Total Population 
 df_top_10 <- df_clean %>%
   select(Name, `Total Population`) %>%
   slice_head(n=10)

@@ -20,6 +20,9 @@ The primary goal of this analysis is to:
 - `exercise.R`  
   R script that performs data cleaning, transformation, and visualization.
 
+- `top_10_facilities.png`
+  Bar plot of top 10 largest facilities.
+  
 - `clean_ice_dentention.csv`  
   Cleaned dataset exported after preprocessing.
 

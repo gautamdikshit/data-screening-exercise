@@ -63,20 +63,20 @@ colSums(is.na(df_clean))
 
 # created new column 'population': total of level A to D
 df_clean <- df_clean %>%
-  mutate(population = Level.A + Level.B + Level.C + Level.D) %>%
-  arrange(desc(population))
+  mutate(`Total Population` = Level.A + Level.B + Level.C + Level.D) %>%
+  arrange(desc(`Total Population`))
 
 # Selected only top ten facilities Name and population 
 df_top_10 <- df_clean %>%
-  select(Name, population) %>%
+  select(Name, `Total Population`) %>%
   slice_head(n=10)
 
 # Visualization
 # Plotted a horizontal bar graph with respective data labels
 
-ggplot(df_top_10, aes(x = reorder(Name, population), y = population)) +
+ggplot(df_top_10, aes(x = reorder(Name, `Total Population`), y = `Total Population`)) +
   geom_bar(stat = "identity", fill = "steelblue") + 
-  geom_text(aes(label = population),
+  geom_text(aes(label = `Total Population`),
             hjust= 1,
             size = 3.5) +
   coord_flip() + 

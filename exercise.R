@@ -61,9 +61,10 @@ colSums(is.na(df_clean))
 # since it is a date which cannot be filled in random, and it doesn't contribute to our final top 10 data so I decided to leave it empty with NA
 
 
-# created new column 'Total Population': total of level A to D and arranged them in descending order
+# created new column 'Total Population': total of level A to D is rounded to two decimal places
+# and arranged them in descending order
 df_clean <- df_clean %>%
-  mutate(`Total Population` = Level.A + Level.B + Level.C + Level.D) %>%
+  mutate(`Total Population` = round(Level.A + Level.B + Level.C + Level.D, 2)) %>%
   arrange(desc(`Total Population`))
 
 # Selected only top ten facilities Name and  Total Population 
@@ -85,11 +86,13 @@ ggplot(df_top_10, aes(x = reorder(Name, `Total Population`), y = `Total Populati
     x = "Facility Name",
     y = "Total Average Population"
   ) + 
-  theme_minimal()
+  theme_minimal() + 
+  theme(
+    panel.grid = element_blank())
 
 # export clean dataset
 write.csv(
   df_clean,
-  "clean_ice_dentention.csv",
+  "output/clean_ice_dentention.csv",
   row.names = FALSE
 )

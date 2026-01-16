@@ -55,7 +55,7 @@ And subset containing the only top 10 largest Detention Facilities is obtained.
 ### C. Visualization 
 
 For the visualization `ggplot2` package is used. A horizontal bar graph is plotted as a result.
-![Top 10 Largest Detention Facilities](output\top_10_facilities.png)
+![Top 10 Largest Detention Facilities](output/top_10_facilities.png)
 
 
 ## Requirements

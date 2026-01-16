@@ -20,9 +20,9 @@ str(df)
 # changed the chr type into numeric type and
 # and finally convert to standard date type
 # and for this date part, taken help from chatgpt and here's the prompt link
-# link: ""
+# link: https://chatgpt.com/share/696a23aa-e404-800a-8343-3b57cc09afb9
 
-df$Last.Inspection.End.Date <- as.numeric(df$Last.Inspection.End.Date) # convert to numeric
+df$Last.Inspection.End.Date <- as.numeric(df$Last.Inspection.End.Date)
 
 df_clean <- df %>%
   mutate(
@@ -42,16 +42,16 @@ df_clean$Name[df$City == "ELK RIVER" & df$State == "MN"] <- "Sherburne County Ja
 # then Name column is transformed to remove the unnecessary characters
 # Name column contained non-ASCII characters (like smart spaces, special Unicode symbols, or invisible characters)
 # Used iconv() to convert all text to UTF-8 and replace invalid char with space " "
-# taken help from chatgpt prompt link is the same: 
+# taken help from chatgpt prompt link is the same: https://chatgpt.com/share/696a23aa-e404-800a-8343-3b57cc09afb9
 df_clean <- df_clean %>%
   mutate(Name = iconv(Name, from = "", to = "UTF-8", sub = " "),
          Name = gsub("[^A-Za-z ]", "", Name)
   )
 
-# Manually filling the missing city
+# 1 missing so manually filling the missing city searching in google and ICE website
 df_clean$City[df_clean$Name == "GEAUGA COUNTY JAIL" & df_clean$State == "OH"] <- "Chardon"
 
-# manually filling the states
+# 2 missing so manually filling the states searching on google and ICE website
 df_clean$State[df_clean$Name == "ATLANTA US PEN"] <- "GA" #Georgia
 df_clean$State[df_clean$Name == "LA SALLE COUNTY REGIONAL DETENTIO[N CENTER"] <- "TX"  #texas
 
@@ -86,3 +86,10 @@ ggplot(df_top_10, aes(x = reorder(Name, population), y = population)) +
     y = "Total Average Population"
   ) + 
   theme_minimal()
+
+# export clean dataset
+write.csv(
+  df_clean,
+  "clean_ice_dentention.csv",
+  row.names = FALSE
+)

@@ -1,0 +1,174 @@
+---
+title: "Ice Detention Facilities Analysis"
+author: "Dikshit Gautam"
+format: html
+editor: visual
+---
+
+This report presents an analysis of a dataset containing information on detention facilities in the United States. The dataset is updated on a semimonthly basis and includes details such as facility names, city, states, inspection end dates, and average population levels categorized from A to D.
+
+The primary goal of this analysis is to:
+
+-   Clean and preprocess the dataset
+
+<!-- -->
+
+-   Compute total population per detention facility
+
+-   Identify and visualize the **top 10 largest detention facilities by average population**
+
+## Loading the necessary libraries for our analysis
+
+We are using library `dplyr` for data manipulations and `ggplot2` for data visualization purpose.
+
+```{r}
+#| message: false
+library(dplyr)
+library(ggplot2)
+```
+
+## Loading the csv file
+
+```{r}
+# Define path to your csv file
+path <- "C:/Users/DELL/Documents/Ice_detention_data_analysis/data/messy_ice_detention.csv"
+
+df <- read.csv(path)
+```
+
+lets take a look at our dataset.
+
+![](snapshots/snapshot_dataset.png){fig-alt="Snapshot of csv file"}
+
+If we take a look at our dataset we can observe that it contains metadata in some rows. So lets skip them. Also, we can clearly see in some cells we have missing values and some indicated as N/A. So, lets make all of them NA. We can use `na.strings` , which handles different representation of missing values. We rewrite the code as:
+
+```{r}
+df <- read.csv(path, skip=6, na.strings = c("", "NA", "N/A", "n/a", "na", " "))
+
+```
+
+Lets inspect the strucrure of the dataset.
+
+```{r}
+#| echo: true
+str(df)
+```
+
+As we see, `Last.Inspection.End.Date` column in charater type, but it should be a date type. But when we see at its values, its in numbers like 45673, 45491, ... and so on. These are dates stored as an Excel serial number. In Excel, dates are stored as numbers.
+
+-   `1 = January 1, 1900`
+
+-    then, `45673 = 45673 days after Jan 1, 1900` . So, we need to convert this numeric value into proper Date.
+
+```{r}
+#| warning: false
+# Converting character to numeric
+df$Last.Inspection.End.Date <- as.numeric(df$Last.Inspection.End.Date)
+
+# No we convert it into standard date format
+df_clean <- df %>%
+  mutate(
+    Last.Inspection.End.Date = as.Date(Last.Inspection.End.Date, origin = "1899-12-30")
+  )
+```
+
+Now let's see.
+
+```{r}
+head(df_clean$Last.Inspection.End.Date,5)
+```
+
+Great! Now lets handle the missing values.
+
+## Handling Missing Values
+
+First, checking the count of missing values in each columns.
+
+```{r}
+colSums(is.na(df_clean))
+```
+
+#### Handling Name column
+
+```{r}
+head(df_clean$Name, 10)
+```
+
+Since there are only 2 missing, with the help of name of state and the city, Google search is used to find that particular detention facility name and also it is verified using the ICE website. It is filled manually using code.
+
+```{r}
+df_clean$Name[df$City == "DOVER" & df$State == "NH"] <- "Strafford County Jail"
+df_clean$Name[df$City == "ELK RIVER" & df$State == "MN"] <- "Sherburne County Jail"
+```
+
+After this the `Name` column is cleaned by removing the `ASCII` and `non-ASCII` characters (like smart spaces, special Unicode symbols, or invisible characters). Used `iconv()` function to convert all text to UTF-8 and replace invalid char with space " ".
+
+```{r}
+df_clean <- df_clean %>%
+  mutate(Name = iconv(Name, from = "", to = "UTF-8", sub = " "),
+         Name = gsub("[^A-Za-z ]", "", Name)
+  )
+```
+
+#### Handling City and State Missing Values
+
+Similar approach as `Name` column is applied to impute the missing values in the column `City` and `State.`
+
+```{r}
+# City
+df_clean$City[df_clean$Name == "GEAUGA COUNTY JAIL" & df_clean$State == "OH"] <- "Chardon"
+
+# State
+df_clean$State[df_clean$Name == "ATLANTA US PEN"] <- "GA" #Georgia
+df_clean$State[df_clean$Name == "LA SALLE COUNTY REGIONAL DETENTION CENTER"] <- "TX"  #texas
+```
+
+```{r}
+colSums(is.na(df_clean))
+```
+
+#### Handling Missing Values in Date Column
+
+The `Last.Inspection.End.Date` column contains `18` missing values. These values were not imputed, as any form of random date assignment would be misleading. Since this variable does not contribute to the primary objective of the analysis, the missing entries are left as it is.
+
+## Analysis
+
+A new column `TotalPopulation` is created which is the summation of columns `Level A` , `Level B` , `Level C` and `Level D`. The result is rounded up to 2 decimal place. Also, the data is arranged in desceding order.
+
+```{r}
+df_clean <- df_clean %>%
+  mutate(`Total Population` = round(Level.A + Level.B + Level.C + Level.D, 2)) %>%
+  arrange(desc(`Total Population`))
+```
+
+Then the subest of `df_clean` is created, named as `df_top_10` with the columns `Name` and `Total Population`, which shows the top 10 largest detention facility.
+
+```{r}
+df_top_10 <- df_clean %>%
+  select(Name, `Total Population`) %>%
+  slice_head(n=10)
+df_top_10
+```
+
+## Visualization
+
+To represent the above table visually, lets plot a horizontal bar graph using ggplot2 library.
+
+```{r}
+plot <- ggplot(df_top_10, aes(x = reorder(Name, `Total Population`), y = `Total Population`)) +
+  geom_bar(stat = "identity", fill = "steelblue") + 
+  geom_text(aes(label = `Total Population`),
+            hjust= 1,
+            size = 3.5) +
+  coord_flip() + 
+  labs(
+    title = "Top 10 Largest Detention Facilities",
+    x = "Facility Name",
+    y = "Total Average Population",
+    caption = "Data Source: ICE Integrated Decision Support (IIDS), 03/17/2025"
+  ) + 
+  theme_minimal() + 
+  theme(
+    panel.grid = element_blank())
+plot
+```

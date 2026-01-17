@@ -53,7 +53,7 @@ df_clean$City[df_clean$Name == "GEAUGA COUNTY JAIL" & df_clean$State == "OH"] <-
 
 # 2 missing so manually filling the states searching on google and ICE website
 df_clean$State[df_clean$Name == "ATLANTA US PEN"] <- "GA" #Georgia
-df_clean$State[df_clean$Name == "LA SALLE COUNTY REGIONAL DETENTIO[N CENTER"] <- "TX"  #texas
+df_clean$State[df_clean$Name == "LA SALLE COUNTY REGIONAL DETENTION CENTER"] <- "TX"  #texas
 
 #final checking of missing values
 colSums(is.na(df_clean))

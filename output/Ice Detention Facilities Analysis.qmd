@@ -11,8 +11,6 @@ The primary goal of this analysis is to:
 
 -   Clean and preprocess the dataset
 
-<!-- -->
-
 -   Compute total population per detention facility
 
 -   Identify and visualize the **top 10 largest detention facilities by average population**
